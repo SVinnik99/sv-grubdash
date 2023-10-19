@@ -37,9 +37,9 @@ function validatePrice(req, res, next) {
     if (price > 0 && typeof price === 'number') {
         return next()
     }
-    next({
+    return next({
         status: 400,
-        message: `Price must be a number, and greater than 0.`
+        message: `The price must be a number, and greater than 0.`
     })
 }
 
@@ -58,6 +58,23 @@ function idExists(req, res, next) {
     })
 }
 
+//Validation for ID matching the router ID
+
+function idMatches(req, res, next) {
+
+    const { dishId } = req.params;
+    const { data: { id } = {} } = req.body;
+
+    if (id && id !== dishId) {
+        next({
+            status: 400,
+            message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}`
+        })
+    } else {
+        return next()
+    }
+
+}
 
 //###################################################################
 
@@ -75,7 +92,7 @@ function create(req, res, next) {
     const { data: { name, description, price, image_url } = {} } = req.body;
 
     const newDish = {
-        id: nextId,
+        id: nextId(),
         name: name,
         description: description,
         price: price,
@@ -83,18 +100,38 @@ function create(req, res, next) {
     }
 
     dishes.push(newDish)
-    res.json({ data: newDish })
+    res.status(201).json({ data: newDish })
 }
 
 // Function to READ a specific dish by its ID (/dishes/:dishId)
 
 function read(req, res, next) {
 
-    res.json({data:res.locals.dish})
+    res.json({ data: res.locals.dish })
 }
+
+// Function to UPDATE a specific dish by ID (/dishes/:dishID)
+
+function update(req, res, next) {
+
+    const { data: { name, description, price, image_url } = {} } = req.body;
+
+    let dish = res.locals.dish;
+
+    dish.name = name
+    dish.description = description
+    dish.price = price
+    dish.image_url = image_url
+
+    res.json({ data: dish })
+
+}
+
 
 module.exports = {
     list,
-    create: [validatePrice, bodyDataHas("name"), bodyDataHas("description"), bodyDataHas("price"), bodyDataHas("image_url"), create],
-    read:[idExists,read]
+    create: [bodyDataHas("name"), bodyDataHas("description"), bodyDataHas("price"), bodyDataHas("image_url"), validatePrice, create],
+    read: [idExists, read],
+    update: [idExists, idMatches, bodyDataHas("name"), bodyDataHas("description"), bodyDataHas("price"), bodyDataHas("image_url"), validatePrice, update],
+
 }
