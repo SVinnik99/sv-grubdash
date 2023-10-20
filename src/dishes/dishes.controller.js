@@ -93,10 +93,10 @@ function create(req, res, next) {
 
     const newDish = {
         id: nextId(),
-        name: name,
-        description: description,
-        price: price,
-        image_url: image_url
+        name,
+        description,
+        price,
+        image_url
     }
 
     dishes.push(newDish)
