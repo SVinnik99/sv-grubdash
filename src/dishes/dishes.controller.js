@@ -110,7 +110,7 @@ function read(req, res, next) {
     res.json({ data: res.locals.dish })
 }
 
-// Function to UPDATE a specific dish by ID (/dishes/:dishID)
+// Function to UPDATE a specific dish by ID (/dishes/:dishId)
 
 function update(req, res, next) {
 
